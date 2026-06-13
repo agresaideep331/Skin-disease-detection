@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Skin Disease Detector</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="auth-page">
+    <div class="auth-container">
+        <div class="auth-card">
+            <h1>Create Account</h1>
+            
+            <!-- Sign Up Type Selector -->
+            <div class="login-type-selector">
+                <div class="login-type-option">
+                    <input type="radio" id="userSignup" name="signupType" value="user" checked>
+                    <label for="userSignup">User Sign Up</label>
+                </div>
+                <div class="login-type-option">
+                    <input type="radio" id="adminSignup" name="signupType" value="admin">
+                    <label for="adminSignup">Admin Sign Up</label>
+                </div>
+            </div>
+            
+            <form id="signupForm">
+                <div class="form-group">
+                    <label for="email">Email ID</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="age">Age</label>
+                        <input type="number" id="age" name="age" min="1" max="150" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="gender">Gender</label>
+                        <select id="gender" name="gender" required>
+                            <option value="">Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="confirm_password">Confirm Password</label>
+                    <input type="password" id="confirm_password" name="confirm_password" required>
+                </div>
+                
+                <!-- Admin Code Field (Hidden by default) -->
+                <div class="form-group" id="adminCodeGroup" style="display: none;">
+                    <label for="admin_code">Admin Registration Code</label>
+                    <input type="password" id="admin_code" name="admin_code" placeholder="Enter admin code">
+                    <small style="color: #999; margin-top: 5px;">Required for admin account creation</small>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Sign Up</button>
+            </form>
+            
+            <div id="message" class="message"></div>
+            
+            <p class="auth-link">Already have an account? <a href="/login">Login</a></p>
+            
+            <div class="admin-prompt">
+                <small>Are you an administrator?</small>
+                <a href="/admin/signup" class="admin-prompt-link">Go to Admin Sign Up →</a>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Handle sign-up type change
+        document.querySelectorAll('input[name="signupType"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                const signupType = e.target.value;
+                const adminCodeGroup = document.getElementById('adminCodeGroup');
+                
+                if (signupType === 'admin') {
+                    adminCodeGroup.style.display = 'block';
+                    document.getElementById('admin_code').focus();
+                } else {
+                    adminCodeGroup.style.display = 'none';
+                    document.getElementById('admin_code').value = '';
+                }
+            });
+        });
+
+        document.getElementById('signupForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const signupType = document.querySelector('input[name="signupType"]:checked').value;
+            const formData = {
+                email: document.getElementById('email').value,
+                age: document.getElementById('age').value,
+                gender: document.getElementById('gender').value,
+                username: document.getElementById('username').value,
+                password: document.getElementById('password').value,
+                confirm_password: document.getElementById('confirm_password').value,
+                signup_type: signupType
+            };
+            
+            if (signupType === 'admin') {
+                formData.admin_code = document.getElementById('admin_code').value;
+            }
+            
+            try {
+                const response = await fetch('/signup', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                const msgDiv = document.getElementById('message');
+                
+                if (result.success) {
+                    msgDiv.className = 'message success';
+                    msgDiv.textContent = result.message;
+                    setTimeout(() => window.location.href = '/login', 2000);
+                } else {
+                    msgDiv.className = 'message error';
+                    msgDiv.textContent = result.message;
+                }
+            } catch (error) {
+                document.getElementById('message').className = 'message error';
+                document.getElementById('message').textContent = 'Error: ' + error.message;
+            }
+        });
+    </script>
+</body>
+</html>

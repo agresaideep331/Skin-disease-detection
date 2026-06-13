@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - Skin Disease Detector</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">SkinCare AI</div>
+            <div class="nav-links">
+                <a href="/home" class="nav-link active">Home</a>
+                <a href="/predict" class="nav-link">Predict</a>
+                <a href="/about" class="nav-link">About</a>
+                <a href="/history" class="nav-link">History</a>
+                <a href="/profile" class="nav-link">Profile</a>
+                <a href="/logout" class="nav-link logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <div class="welcome-section">
+            <h1>Welcome, {{ username }}!</h1>
+            <p>Detect skin diseases using AI-powered image analysis</p>
+        </div>
+        
+        <div class="skin-care-section">
+            <h2>Basic Skin Care by Skin Type</h2>
+            <div class="skin-types-grid">
+                {% for skin_type, info in skin_types.items() %}
+                <div class="skin-type-card" onclick="toggleSkinType(this)">
+                    <div class="skin-type-header">
+                        <h3>{{ skin_type }}</h3>
+                    </div>
+                    <div class="skin-type-details">
+                        <p><strong>Description:</strong> {{ info.description }}</p>
+                        <p><strong>Daily Care:</strong> {{ info.daily_care }}</p>
+                        <p><strong>Morning Routine:</strong> {{ info.morning }}</p>
+                        <p><strong>Night Routine:</strong> {{ info.night }}</p>
+                        <p><strong>Do's:</strong> {{ info.dos }}</p>
+                        <p><strong>Don'ts:</strong> {{ info.donts }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function toggleSkinType(card) {
+            const allCards = document.querySelectorAll('.skin-type-card');
+            
+            allCards.forEach(c => {
+                if (c !== card) {
+                    c.classList.remove('active');
+                }
+            });
+            
+            card.classList.toggle('active');
+        }
+    </script>
+</body>
+</html>

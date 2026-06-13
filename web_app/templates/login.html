@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Skin Disease Detector</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="auth-page">
+    <div class="auth-container">
+        <div class="auth-card">
+            <h1>Login</h1>
+            
+            <!-- Login Type Selector -->
+            <div class="login-type-selector">
+                <div class="login-type-option">
+                    <input type="radio" id="userLogin" name="loginType" value="user" checked>
+                    <label for="userLogin">User Login</label>
+                </div>
+                <div class="login-type-option">
+                    <input type="radio" id="adminLogin" name="loginType" value="admin">
+                    <label for="adminLogin">Admin Login</label>
+                </div>
+            </div>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Login</button>
+            </form>
+            
+            <div id="message" class="message"></div>
+            
+            <p class="auth-link" id="signupLink">Don't have an account? <a href="/signup">Sign Up</a></p>
+            
+            <div class="admin-prompt">
+                <small>Are you an administrator?</small>
+                <a href="/admin/login" class="admin-prompt-link">Go to Admin Login →</a>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Handle login type change
+        document.querySelectorAll('input[name="loginType"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                const loginType = e.target.value;
+                const signupLink = document.getElementById('signupLink');
+                const form = document.getElementById('loginForm');
+                
+                if (loginType === 'admin') {
+                    signupLink.style.display = 'none';
+                } else {
+                    signupLink.style.display = 'block';
+                }
+            });
+        });
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const loginType = document.querySelector('input[name="loginType"]:checked').value;
+            const formData = {
+                username: document.getElementById('username').value,
+                password: document.getElementById('password').value,
+                login_type: loginType
+            };
+            
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                const msgDiv = document.getElementById('message');
+                
+                if (result.success) {
+                    msgDiv.className = 'message success';
+                    msgDiv.textContent = result.message;
+                    const redirectUrl = loginType === 'admin' ? '/admin/dashboard' : '/home';
+                    setTimeout(() => window.location.href = redirectUrl, 1000);
+                } else {
+                    msgDiv.className = 'message error';
+                    msgDiv.textContent = result.message;
+                }
+            } catch (error) {
+                document.getElementById('message').className = 'message error';
+                document.getElementById('message').textContent = 'Error: ' + error.message;
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Predict - Skin Disease Detector</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">SkinCare AI</div>
+            <div class="nav-links">
+                <a href="/home" class="nav-link">Home</a>
+                <a href="/predict" class="nav-link active">Predict</a>
+                <a href="/about" class="nav-link">About</a>
+                <a href="/history" class="nav-link">History</a>
+                <a href="/profile" class="nav-link">Profile</a>
+                <a href="/logout" class="nav-link logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <div class="predict-section">
+            <h1>Skin Disease Prediction</h1>
+            <p>Upload a skin image for AI-powered analysis</p>
+            
+            <div class="predict-card">
+                <div class="upload-area" id="uploadArea">
+                    <input type="file" id="imageInput" accept="image/jpeg,image/jpg,image/png" style="display: none;">
+                    <p>Drag image here or click to upload</p>
+                    <small>Supported: JPG, JPEG, PNG</small>
+                </div>
+                
+                <div id="imagePreview" class="image-preview" style="display: none;">
+                    <img id="previewImg" src="" alt="Preview">
+                </div>
+                
+                <button id="predictBtn" class="btn btn-primary" style="display: none; width: 100%; margin-top: 20px;">Predict</button>
+            </div>
+            
+            <div id="result" class="result-card" style="display: none;">
+                <h2>Prediction Result</h2>
+                <div class="result-content">
+                    <p><strong>Disease:</strong> <span id="diseaseName"></span></p>
+                    <p><strong>Confidence:</strong> <span id="confidence"></span>%</p>
+                    <p><strong>Description:</strong> <span id="description"></span></p>
+                    <p><strong>Treatment:</strong> <span id="treatment"></span></p>
+                    <p><strong>Prevention:</strong> <span id="prevention"></span></p>
+                </div>
+                <button id="newPredictBtn" class="btn btn-secondary">New Prediction</button>
+            </div>
+            
+            <div id="message" class="message"></div>
+        </div>
+    </div>
+    
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const imageInput = document.getElementById('imageInput');
+        const imagePreview = document.getElementById('imagePreview');
+        const previewImg = document.getElementById('previewImg');
+        const predictBtn = document.getElementById('predictBtn');
+        const resultDiv = document.getElementById('result');
+        const messageDiv = document.getElementById('message');
+        const newPredictBtn = document.getElementById('newPredictBtn');
+        
+        let selectedFile = null;
+        
+        uploadArea.addEventListener('click', () => imageInput.click());
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#4CAF50';
+        });
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.style.borderColor = '#ddd';
+        });
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.style.borderColor = '#ddd';
+            handleFile(e.dataTransfer.files[0]);
+        });
+        
+        imageInput.addEventListener('change', (e) => {
+            handleFile(e.target.files[0]);
+        });
+        
+        function handleFile(file) {
+            if (!file || !['image/jpeg', 'image/jpg', 'image/png'].includes(file.type)) {
+                messageDiv.className = 'message error';
+                messageDiv.textContent = 'Please upload a valid image file';
+                return;
+            }
+            
+            selectedFile = file;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewImg.src = e.target.result;
+                imagePreview.style.display = 'block';
+                uploadArea.style.display = 'none';
+                predictBtn.style.display = 'block';
+                messageDiv.textContent = '';
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        predictBtn.addEventListener('click', async () => {
+            if (!selectedFile) return;
+            
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+            
+            predictBtn.disabled = true;
+            predictBtn.textContent = 'Analyzing...';
+            
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    document.getElementById('diseaseName').textContent = result.disease;
+                    document.getElementById('confidence').textContent = result.confidence;
+                    document.getElementById('description').textContent = result.description;
+                    document.getElementById('treatment').textContent = result.treatment;
+                    document.getElementById('prevention').textContent = result.prevention;
+                    resultDiv.style.display = 'block';
+                    messageDiv.textContent = '';
+                } else {
+                    messageDiv.className = 'message error';
+                    messageDiv.textContent = result.message;
+                }
+            } catch (error) {
+                messageDiv.className = 'message error';
+                messageDiv.textContent = 'Error: ' + error.message;
+            } finally {
+                predictBtn.disabled = false;
+                predictBtn.textContent = 'Predict';
+            }
+        });
+        
+        newPredictBtn.addEventListener('click', () => {
+            selectedFile = null;
+            imageInput.value = '';
+            imagePreview.style.display = 'none';
+            uploadArea.style.display = 'block';
+            predictBtn.style.display = 'none';
+            resultDiv.style.display = 'none';
+            messageDiv.textContent = '';
+        });
+    </script>
+</body>
+</html>

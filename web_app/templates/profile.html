@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - Skin Disease Detector</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">SkinCare AI</div>
+            <div class="nav-links">
+                <a href="/home" class="nav-link">Home</a>
+                <a href="/predict" class="nav-link">Predict</a>
+                <a href="/about" class="nav-link">About</a>
+                <a href="/history" class="nav-link">History</a>
+                <a href="/profile" class="nav-link active">Profile</a>
+                <a href="/logout" class="nav-link logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <div class="profile-section">
+            <h1>Your Profile</h1>
+            
+            <div class="profile-card">
+                <div class="profile-info">
+                    <div class="info-row">
+                        <span class="label">Username:</span>
+                        <span class="value">{{ username }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Email:</span>
+                        <span class="value">{{ email }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Age:</span>
+                        <span class="value">{{ age }}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Gender:</span>
+                        <span class="value">{{ gender }}</span>
+                    </div>
+                    <div class="info-row highlight">
+                        <span class="label">Total Predictions:</span>
+                        <span class="value">{{ prediction_count }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

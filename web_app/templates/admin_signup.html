@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Sign Up - SkinCare AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin-auth.css') }}">
+</head>
+<body class="auth-page admin-auth-page">
+    <div class="auth-container admin-auth-container">
+        <div class="auth-card admin-auth-card">
+            <div class="admin-header">
+                <div class="admin-badge-large">👤 NEW ADMIN</div>
+                <h1>Create Admin Account</h1>
+                <p>Register a new administrator account</p>
+            </div>
+            
+            <form id="adminSignupForm">
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" name="email" placeholder="Enter email" required>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="age">Age</label>
+                        <input type="number" id="age" name="age" min="18" max="150" placeholder="18+" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="gender">Gender</label>
+                        <select id="gender" name="gender" required>
+                            <option value="">Select</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="username">Admin Username</label>
+                    <input type="text" id="username" name="username" placeholder="Choose admin username" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Minimum 8 characters" minlength="8" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="confirm_password">Confirm Password</label>
+                    <input type="password" id="confirm_password" name="confirm_password" placeholder="Re-enter password" required>
+                </div>
+                
+                <div class="form-group admin-code-group">
+                    <label for="admin_code">
+                        Admin Registration Code
+                        <span class="code-required">*Required</span>
+                    </label>
+                    <input type="password" id="admin_code" name="admin_code" placeholder="Enter registration code" required>
+                    <small>Contact your system administrator for the code</small>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-admin">Create Admin Account</button>
+            </form>
+            
+            <div id="message" class="message"></div>
+            
+            <div class="auth-links-admin">
+                <a href="/admin/login" class="link-back">← Back to Admin Login</a>
+                <a href="/login" class="link-user">User Login</a>
+            </div>
+        </div>
+
+        <!-- Requirements Panel -->
+        <div class="security-info requirements-panel">
+            <h3>📋 Admin Account Requirements</h3>
+            <ul>
+                <li>✓ Must be 18 years or older</li>
+                <li>✓ Valid email address required</li>
+                <li>✓ Strong password (8+ characters)</li>
+                <li>✓ Admin registration code required</li>
+                <li>✓ Verified identity for enhanced security</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        document.getElementById('adminSignupForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value.trim();
+            const age = document.getElementById('age').value.trim();
+            const gender = document.getElementById('gender').value.trim();
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const confirmPassword = document.getElementById('confirm_password').value.trim();
+            const adminCode = document.getElementById('admin_code').value.trim();
+            
+            const msgDiv = document.getElementById('message');
+            
+            // Validation
+            if (!email || !age || !gender || !username || !password || !confirmPassword || !adminCode) {
+                msgDiv.className = 'message error';
+                msgDiv.textContent = '✗ All fields are required';
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                msgDiv.className = 'message error';
+                msgDiv.textContent = '✗ Passwords do not match';
+                return;
+            }
+            
+            if (password.length < 8) {
+                msgDiv.className = 'message error';
+                msgDiv.textContent = '✗ Password must be at least 8 characters';
+                return;
+            }
+            
+            const ageNum = parseInt(age);
+            if (ageNum < 18 || ageNum > 150) {
+                msgDiv.className = 'message error';
+                msgDiv.textContent = '✗ Admin must be at least 18 years old';
+                return;
+            }
+            
+            const formData = {
+                email: email,
+                age: age,
+                gender: gender,
+                username: username,
+                password: password,
+                confirm_password: confirmPassword,
+                admin_code: adminCode
+            };
+            
+            try {
+                const response = await fetch('/admin/signup', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    msgDiv.className = 'message success';
+                    msgDiv.textContent = '✓ ' + result.message;
+                    setTimeout(() => window.location.href = '/admin/login', 2000);
+                } else {
+                    msgDiv.className = 'message error';
+                    msgDiv.textContent = '✗ ' + result.message;
+                }
+            } catch (error) {
+                msgDiv.className = 'message error';
+                msgDiv.textContent = '✗ Error: ' + error.message;
+            }
+        });
+    </script>
+</body>
+</html>

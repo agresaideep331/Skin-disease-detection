@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - SkinCare AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin-auth.css') }}">
+</head>
+<body class="auth-page admin-auth-page">
+    <div class="auth-container admin-auth-container">
+        <div class="auth-card admin-auth-card">
+            <div class="admin-header">
+                <div class="admin-badge-large">🔐 ADMIN</div>
+                <h1>Administrator Login</h1>
+                <p>Access the admin dashboard</p>
+            </div>
+            
+            <form id="adminLoginForm">
+                <div class="form-group">
+                    <label for="username">Admin Username</label>
+                    <input type="text" id="username" name="username" placeholder="Enter admin username" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" name="password" placeholder="Enter password" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary btn-admin">Login to Dashboard</button>
+            </form>
+            
+            <div id="message" class="message"></div>
+            
+            <div class="auth-links-admin">
+                <a href="/login" class="link-back">← User Login</a>
+                <a href="/admin/signup" class="link-signup">Create Admin Account</a>
+            </div>
+        </div>
+
+        <!-- Security Info Panel -->
+        <div class="security-info">
+            <h3>🛡️ Security Notice</h3>
+            <ul>
+                <li>Use only on secure networks</li>
+                <li>Never share your credentials</li>
+                <li>Admin panel access is monitored</li>
+                <li>Always logout when finished</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            
+            if (!username || !password) {
+                document.getElementById('message').className = 'message error';
+                document.getElementById('message').textContent = '✗ Username and password required';
+                return;
+            }
+            
+            const formData = {
+                username: username,
+                password: password
+            };
+            
+            try {
+                const response = await fetch('/admin/login', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                const msgDiv = document.getElementById('message');
+                
+                if (result.success) {
+                    msgDiv.className = 'message success';
+                    msgDiv.textContent = '✓ ' + result.message;
+                    setTimeout(() => window.location.href = '/admin/dashboard', 1500);
+                } else {
+                    msgDiv.className = 'message error';
+                    msgDiv.textContent = '✗ ' + result.message;
+                }
+            } catch (error) {
+                document.getElementById('message').className = 'message error';
+                document.getElementById('message').textContent = '✗ Error: ' + error.message;
+            }
+        });
+    </script>
+</body>
+</html>

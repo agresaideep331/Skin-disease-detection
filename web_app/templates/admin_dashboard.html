@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - SkinCare AI</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+</head>
+<body>
+    <!-- Admin Navbar -->
+    <nav class="navbar admin-navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <span class="admin-badge">ADMIN</span> SkinCare AI
+            </div>
+            <div class="nav-links">
+                <a href="/admin/dashboard" class="nav-link active">Dashboard</a>
+                <a href="/admin/users" class="nav-link">Users</a>
+                <a href="/logout" class="nav-link logout">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container admin-container">
+        <!-- Welcome Section -->
+        <div class="welcome-section admin-welcome">
+            <h1>Welcome, {{ admin_username }}!</h1>
+            <p>Here's an overview of your SkinCare AI system</p>
+        </div>
+
+        <!-- Statistics Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon users-icon">👥</div>
+                <div class="stat-content">
+                    <h3>Total Users</h3>
+                    <p class="stat-number">{{ total_users }}</p>
+                    <span class="stat-label">Registered Members</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon predictions-icon">🔍</div>
+                <div class="stat-content">
+                    <h3>Total Predictions</h3>
+                    <p class="stat-number">{{ total_predictions }}</p>
+                    <span class="stat-label">Skin Disease Detections</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon diseases-icon">🏥</div>
+                <div class="stat-content">
+                    <h3>Top Diseases</h3>
+                    <p class="stat-number">{{ top_diseases|length }}</p>
+                    <span class="stat-label">Most Detected Conditions</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top Diseases Section -->
+        <div class="admin-section">
+            <h2>Top 5 Most Detected Diseases</h2>
+            <div class="diseases-list">
+                {% if top_diseases %}
+                    {% for disease in top_diseases %}
+                    <div class="disease-item">
+                        <div class="disease-name">{{ disease['disease'] }}</div>
+                        <div class="disease-bar">
+                            <div class="disease-progress" style="width: {{ (disease['count'] / top_diseases[0]['count'] * 100)|int }}%">
+                                <span class="disease-count">{{ disease['count'] }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="empty-message">No prediction data available yet.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Recent Predictions Section -->
+        <div class="admin-section">
+            <h2>Recent Predictions</h2>
+            <div class="history-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Disease</th>
+                            <th>Confidence</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if recent_predictions %}
+                            {% for prediction in recent_predictions %}
+                            <tr>
+                                <td>{{ prediction['username'] }}</td>
+                                <td>{{ prediction['disease'] }}</td>
+                                <td>
+                                    <span class="confidence-badge" style="background: {{ 'linear-gradient(135deg, #4CAF50, #2E7D32)' if prediction['confidence'] >= 0.85 else 'linear-gradient(135deg, #FF9800, #F57C00)' }}">
+                                        {{ "%.2f"|format(prediction['confidence']) }}%
+                                    </span>
+                                </td>
+                                <td>{{ prediction['date'] }}</td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="4" style="text-align: center; padding: 20px; color: #999;">No predictions yet</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <a href="/admin/users" class="action-btn">
+                <span>👥</span>
+                <span>Manage Users</span>
+            </a>
+            <a href="/logout" class="action-btn logout-btn">
+                <span>🚪</span>
+                <span>Logout</span>
+            </a>
+        </div>
+    </div>
+
+    <style>
+        .admin-navbar .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .admin-badge {
+            background: rgba(255, 255, 255, 0.3);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+    </style>
+</body>
+</html>
